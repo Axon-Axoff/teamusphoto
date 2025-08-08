@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block body %}
+<div class="container">
+  <div class="d-flex align-items-center justify-content-center" style="height: 350px">
+  <form method="POST">
+    {% csrf_token %}
+    <div class="text-dark">
+      Registration Access Code:
+    </div>
+    <input class="form-control" type="text" name="password">
+    <div class="mt-4 text-center">
+      <input type="submit" class="btn btn-dark" value="Next">
+    </div>
+  </form>
+  </div>
+</div>
+
+{% endblock %}

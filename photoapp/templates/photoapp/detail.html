@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div class="mx-auto">
+  <h1 class="text-center">{{ photo.title }}
+  {% if fav %}<img src="/media/heart.png" alt="Favorite">{% endif %}
+  </h1>
+  <p class="text-center fw-light">Uploaded on: {{photo.created|date:'N d Y'}} by
+    <a href="{% url 'photo:list' %}?member={{ photo.submitter.first_name }} {{ photo.submitter.last_name }}
+    &page=1" class="text-dark fw-bold">{{photo.submitter.first_name}} {{ photo.submitter.last_name }}</a>
+  {% if photo.edited_by %}<br/><span class="text-white">Edited by:
+    <a href="{% url 'photo:list' %}?member={{ photo.edited_by.first_name }} {{ photo.edited_by.last_name}}
+    &page=1" class="text-white fw-bold">{{ photo.edited_by.first_name }} {{ photo.edited_by.last_name }}</a>
+  </span>
+  {% endif %}</p>
+  {% if user.is_editor %}
+    <p class="text-center">
+      <span>See something wrong? <a href="{% url 'photo:update' photo.id %}" class="px-2">
+        <button class="btn btn-sm btn-warning">Edit details here</button></a></span>
+      {% if user == photo.submitter %}
+      <span><a href="{% url 'photo:delete' photo.id %}" class="px-2">
+        <button class="btn btn-sm btn-danger">Delete</button></a></span>
+      {% endif %}
+    </p>
+  {% endif %}
+  <h6 class="text-white">Click on photo to see full screen.  Right-click on photo to save print size version.</h6>
+</div>
+<div class="row pb-5">
+  <div class="col-md-8">
+    <a href="{{photo.image.url}}">
+    <img src="{{photo.image.url}}" alt="" width="100%" />
+    </a>
+  </div>
+  <div class="col-md-4">
+    <h6>{{ photo.description }}</h6>
+    {% if not fav %}
+
+    <form class="mb-4" method="POST">
+      {% csrf_token %}
+      <button type="submit" name="add" class="btn btn-sm btn-success" value="add">Add To Favorites</button>
+    </form>
+    {% else %}
+    <form class="mb-4" method="POST">
+      {% csrf_token %}
+      <button type="submit" name="remove" class="btn btn-sm btn-danger" value="remove">Remove From Favorites</button>
+    </form>
+    {% endif %}
+    {% if favorites|length > 0 %}
+      <h4>Favorite Of:</h4>
+      {% for favorite in favorites %}
+        {{ favorite.user.first_name }} {{ favorite.user.last_name }}<br/>
+      {% endfor %}
+    {% endif %}
+    <h4 class="my-4">More about this photo:</h4>
+    <strong>Year</strong>
+    <ul class="list-group list-group-horizontal-lg list-unstyled py-2">
+      <li><a href="{% url 'photo:list' %}?year={{ photo.year }}&page=1" class="btn btn-sm list-group-item list-group-item-primary">{{photo.year}}</a></li>
+    </ul>
+    <strong>People</strong>
+    <ul class="list-group list-group-horizontal-lg list-unstyled py-2">
+      {% for person in photo.people.all %}
+        <li><a href="{% url 'photo:list' %}?person={{ person.name }}&page=1" class="btn btn-sm list-group-item list-group-item-primary">{{person.name}}</a></li>
+      {% endfor %}
+    </ul>
+    <strong>Tags</strong>
+    <ul class="list-group list-group-horizontal-lg list-unstyled py-2">
+      {% for tag in photo.tags.all %}
+        <li><a href="{% url 'photo:list' %}?tag={{ tag.name }}&page=1" class="btn btn-sm list-group-item list-group-item-primary">{{tag.name}}</a></li>
+      {% endfor %}
+    </ul>
+    <h5>Comments:</h5>
+    <div class="row">
+      {% for comment in photo.comments.all %}
+        <div class="comment">
+          <p class="date"><strong>{{ comment.submitter }}:</strong> {{ comment.created|date:"m-d-Y" }}
+            {% if user == comment.submitter %}
+            <span><a href="{% url 'photo:delete_comment' comment.id %}" class="text-danger px-2"><strong>Delete Comment</strong></a></span>
+            {% endif %}
+          </p>
+          <div class="mb-2" style="">{{ comment.text|safe|linebreaksbr }}</div>
+        </div>
+        {% empty %}
+          <p class="mt-2">No comments.</p>
+
+      {% endfor %}
+      </div>
+      <div class="form-class mt-4">
+        <form method="POST">
+          {% csrf_token %}
+          <div class="mb-2">
+            <input type="hidden" name="photo" value="{{ photo.id }}">
+            <textarea name="text" class="form-control" cols="20" rows="3" required="" id="id_text"></textarea>
+          </div>
+
+          <button type="submit" name="comment" class="btn btn-dark" value="comment">Post Comment</button>
+        </form>
+
+      </div>
+  </div>
+</div>
+
+{% endblock body %}

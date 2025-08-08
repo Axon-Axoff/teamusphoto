@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block body %}
+<div class="mx-auto">
+  <h1 class="mt-3 text-center">Add photo (5mb or less please)</h1>
+</div>
+<div class="form-group">
+  <form action="" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div id="div_id_image" class="form-group mb-4">
+      <label for="id_image" class=" requiredField"><strong>Image (up to 5mb)<span class="asteriskField">*</span></strong></label>
+      <div>
+        <input type="file" name="image" accept="image/*" class="clearablefileinput form-control-file" required id="id_image">
+        <div id="image-here"></div>
+      </div>
+    </div>
+    <div id="div_id_title" class="form-group mb-4">
+      <label for="id_title" class=" requiredField"><strong>Title<span class="asteriskField">*</span> (Keep short)</strong></label>
+      <div>
+        <input type="text" name="title" maxlength="64" class="textinput textInput form-control" required id="id_title">
+      </div>
+    </div>
+    <div id="div_id_description" class="form-group mb-4">
+      <label for="id_description" class=" requiredField"><strong>Description<span class="asteriskField">*</span>
+        (A more verbose description)</strong>
+      </label>
+      <div>
+        <input type="text" name="description" maxlength="255" class="textinput textInput form-control" required id="id_description">
+      </div>
+    </div>
+    <div id="div_id_year" class="form-group mb-4">
+      <label for="id_year" class="requiredField"><strong>Year<span class="asteriskField">*</span>
+        (Approximate year photo was taken, enter '?' if unknown)</strong>
+      </label>
+      <div>
+        {{ form.year }}
+      </div>
+    </div>
+    <div id="div_id_people" class="form-group mb-4">
+      <label for="id_people" class="requiredField"><strong>People<span class="asteriskField">*</span>
+        (Full Names, comma separated, or None. No symbols or punctuation. Choose from list below or add new person.)</strong>
+      </label>
+      <div>
+        <input type="text" name="people" class="tagwidget form-control" required id="id_people">
+        <select class="form-select form-select-sm mt-2" aria-label="Default select example" id="dd_people">
+          {% for person in people %}
+            <option>{{ person.name }}</option>
+          {% endfor %}
+        </select>
+        <small id="hint_id_people" class="form-text text-dark mb-4">A comma-separated list of tags.</small>
+      </div>
+    </div>
+    <div id="div_id_tags" class="form-group mb-4">
+      <label for="id_tags" class="requiredField"><strong>Tags<span class="asteriskField">*</span>
+        (Tags other than people or year, comma separated, no symbols or punctuation. Choose from list below or make new tag)</strong>
+      </label>
+      <div>
+        <input type="text" name="tags" class="tagwidget form-control" required id="id_tags">
+        <select class="form-select form-select-sm mt-2" aria-label="Default select example" id="dd_tags">
+          {% for tag in tags %}
+            <option>{{ tag.name }}</option>
+          {% endfor %}
+        </select>
+        <small id="hint_id_tags" class="form-text text-dark">A comma-separated list of tags.</small>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-success mb-4">Add Photo</button>
+  </form>
+</div>
+<style>
+#image-here{
+  width: 400px;
+  height: 400px;
+  border: 1px solid black;
+  background-position: center;
+  background-size: cover;
+}
+</style>
+<script>
+const image_input = document.querySelector("#id_image");image_input.addEventListener("change", function() {
+  const reader = new FileReader();
+  reader.addEventListener("load", () => {
+    const uploaded_image = reader.result;
+    document.querySelector("#image-here").style.backgroundImage = `url(${uploaded_image})`;
+  });
+  reader.readAsDataURL(this.files[0]);
+});
+
+</script>
+{% endblock body %}

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div class="container">
+  <h3>Members:</h3>
+  {% for member in members %}
+  <strong><a href="{% url 'photo:list' %}?member={{ member.first_name }} {{ member.last_name}}&page=1"
+    class="text-dark">
+  {{ member.first_name }} {{ member.last_name }}</a> </strong>
+    {% for key, value in member_photos.items %}
+      {% if key == member.id %}
+        (<strong>{{ value }}</strong>) photos uploaded.
+      {% endif %}
+    {% endfor %}
+    {% for key, value in favorites.items %}
+      {% if key == member.id %}
+        <a href="{% url 'photo:list' %}?favorites={{ member.first_name }} {{ member.last_name }}&page=1"
+        class="text-danger fw-bold"> ({{ value }}) Favorites.</a>
+      {% endif %}
+    {% endfor %}
+  <br>
+  {% endfor %}
+</div>
+
+{% endblock %}

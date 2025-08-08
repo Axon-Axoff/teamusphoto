@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<div class="row">
+  <div class="col-2 mb-4">
+    <h4 class="fw-bold">Tags</h4>
+    {% for key, value in tag_list.items %}
+      {% if value < 2 %}
+        <a href="{% url 'photo:list' %}?tag={{ key }}&page=1" class="date link-dark">
+          {{ key }} (<span class="fw-bold" style="color:#3841b4">{{ value }}</span>)</a><br/>
+      {% elif value < 10 %}
+        <a href="{% url 'photo:list' %}?tag={{ key }}&page=1" class="date link-dark fw-bold">
+          {{ key }} (<span style="color:#3841b4">{{ value }}</span>)</a><br/>
+      {% elif value < 40 %}
+        <small><a href="{% url 'photo:list' %}?tag={{ key }}&page=1" class="link-dark fw-bold">
+          {{ key }} (<span style="color:#3841b4">{{ value }}</span>)</a></small><br/>
+      {% else %}
+        <a href="{% url 'photo:list' %}?tag={{ key }}&page=1" class="link-dark fw-bold">
+          {{ key }} (<span style="color:#3841b4">{{ value }}</span>)</a><br/>
+      {% endif %}
+    {% endfor %}
+  </div>
+  <div class="col-2 mb-4">
+    <h4 class="fw-bold">Year</h4>
+    <form class="" method="GET">
+      {% csrf_token %}
+      <select class="yearbutton" name="year">
+        {% for key, value in year_list.items %}
+        <option value="{{ key }}">{{ key }} ({{ value }})</option>
+        {% endfor %}
+      </select>
+      <input type="hidden" name="page" value="1">
+      <button type="submit" class="btn btn-dark">Go</button>
+    </form>
+    <h4 class="fw-bold">People</h4>
+    {% for key, value in people_list.items %}
+      {% if key|stringformat:'s' == 'None' %}
+        <a href="{% url 'photo:list' %}?person={{ key }}&page=1" class="link-light">
+          <strong>{{ key }} ({{ value }})</strong></a><br/>
+      {% else %}
+        <a href="{% url 'photo:list' %}?person={{ key }}&page=1" class="link-dark">
+          {{ key }} (<span class="fw-bold" style="color:#3841b4">{{ value }}</span>)</a><br/>
+      {% endif %}
+    {% endfor %}
+  </div>
+  <div class="col-8">
+    <div class="row">
+      <a href="{% url 'photo:list' %}?page=1" class="ml-4"><button class="btn btn-sm btn-warning">See All {{ photo_list|length }} Photos</button></a>
+      <div class="text-centered m-2"><h3>{{ message }}</h3>
+        <h4>Sort By:
+        <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=createdasc&page=1"><button class='btn btn-sm btn-dark'>Date Added ▲</button></a>
+        <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=createddesc&page=1"><button class='btn btn-sm btn-dark'>Date Added ▼</button></a>
+        <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=yearasc&page=1"><button class='btn btn-sm btn-dark'>Year ▲</button></a>
+        <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=yeardesc&page=1"><button class='btn btn-sm btn-dark'>Year ▼</button></a>
+        </h4>
+      </div>
+        {% for photo in photos %}
+        <a href="{% url 'photo:detail' photo.id %}" class="d-block mb-4 w-25">
+        <img src="/media/{{photo.thumbnail}}" class="img-fluid img-thumbnail rounded" alt="{{photo.title}}" />
+        <div class="title text-white">{{ photo.title }}</div>
+        <div class="date text-white"><em>Added {{ photo.created|date:'N d Y' }}</em></div>
+        <div class="date text-white"><em>By {{ photo.submitter }}</em></div>
+        <div class="date text-white">Photo taken in <strong>{{ photo.year }}</strong></div>
+        {% if photo.comments.all|length > 0 %}
+          <span class="date" style="color:#3841b4"><strong>*Comments ({{ photo.comments.all|length }}) </strong></span>
+        {% endif %}
+        {% if photo.favorite.all|length > 0 %}
+          <span class="date text-danger"><strong>*Favorites ({{ photo.favorite.all|length }})</strong></span>
+        {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+    <!-- Pagination code starts here -->
+    <div class="container-fluid">
+      {% for page_number in photos.adjusted_elided_pages %}
+        {% if page_number == photos.paginator.ELLIPSIS %}
+            {{page_number}}
+        {% else %}
+          {% if page_number != photos.number %}
+            <a href="?{{ search_m }}={{ search }}&sort_by={{ sort }}&page={{ page_number }}" class="float-right btn btn-dark">{{ page_number }}</a>
+          {% else %}
+            <span class="float-right btn btn-warning"><strong>{{page_number}}</strong></span>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+    </div>
+    <!-- Pagination code ends here -->
+  </div>
+
+</div>
+
+{% endblock body %}

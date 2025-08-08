@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block body %}
+<div class="mx-auto">
+  <h1 class="mt-3 text-center">Edit photo {{photo}}</h1>
+</div>
+<div class="row">
+  <div class="col-4">
+    <img src="{{ photo.image.url }}" class="w-100 mt-4 mb-4" alt="">
+  </div>
+  <div class="col-8">
+    <div class="form-group">
+      <form action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div id="div_id_title" class="form-group mb-4">
+          <label for="id_title" class=" requiredField"><strong>Title<span class="asteriskField">*</span> (Keep short)</strong></label>
+          <div>
+            <input type="text" name="title" value="{{ form.title.value }}"maxlength="64" class="textinput textInput form-control" required id="id_title">
+          </div>
+        </div>
+        <div id="div_id_description" class="form-group mb-4">
+          <label for="id_description" class=" requiredField"><strong>Description<span class="asteriskField">*</span>
+            (A more verbose description)</strong>
+          </label>
+          <div>
+            <input type="text" name="description" value="{{ form.description.value }}" maxlength="255" class="textinput textInput form-control" required id="id_description">
+          </div>
+        </div>
+        <div id="div_id_year" class="form-group mb-4">
+          <label for="id_year" class="requiredField"><strong>Year<span class="asteriskField">*</span>
+            (Approximate year photo was taken, enter '?' if unknown)</strong>
+          </label>
+          <div>
+            {{ form.year }}
+          </div>
+        </div>
+        <div id="div_id_people" class="form-group mb-4">
+          <label for="id_people" class="requiredField"><strong>People<span class="asteriskField">*</span>
+            (Full Names, comma separated, or None. No symbols or punctuation. Choose from list below or add new person.)</strong>
+          </label>
+          <div>
+            <input type="text" name="people" value="{% for person in form.people.value %}{{ person }},{% endfor %}"
+            class="tagwidget form-control" required id="id_people">
+            <select class="form-select form-select-sm mt-2" aria-label="Default select example" id="dd_people">
+              {% for person in people %}
+                <option>{{ person.name }}</option>
+              {% endfor %}
+            </select>
+            <small id="hint_id_people" class="form-text text-dark mb-4">A comma-separated list of tags.</small>
+          </div>
+        </div>
+        <div id="div_id_tags" class="form-group mb-4">
+          <label for="id_tags" class="requiredField"><strong>Tags<span class="asteriskField">*</span>
+            (Tags other than people or year, comma separated, no symbols or punctuation. Choose from list below or make new tag)</strong>
+          </label>
+          <div>
+            <input type="text" name="tags" value="{% for tag in form.tags.value %}{{ tag }},{% endfor %}" 
+            class="tagwidget form-control" required id="id_tags">
+            <select class="form-select form-select-sm mt-2" aria-label="Default select example" id="dd_tags">
+              {% for tag in tags %}
+                <option>{{ tag.name }}</option>
+              {% endfor %}
+            </select>
+            <small id="hint_id_tags" class="form-text text-dark">A comma-separated list of tags.</small>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-success mb-3">Edit Photo</button>
+        <button type="submit" class="btn btn-primary mb-3" onClick="javascript:history.go(-1);">Back</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock body %}
