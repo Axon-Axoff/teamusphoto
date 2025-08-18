@@ -1,0 +1,71 @@
+<div class="modal fade" id="activityModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header border-secondary">
+        <h3 class="modal-title text-warning">Recent activity</h3>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <ul class="nav nav-tabs mb-3" role="tablist">
+          <li class="nav-item">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-comments" type="button" style="color:#8877ff;">Comments</button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-favorites" type="button" style="color:#ff7788;">Favorites</button>
+          </li>
+        </ul>
+
+        <div class="tab-content">
+          <div class="tab-pane fade show active" id="tab-comments">
+            {% for c in recent_comments %}
+              <div class="border-bottom border-secondary p-2 small">
+                <div class="row">
+                  <div class="col-8">
+                    <strong>
+                      <a href="{% url 'photo:list' %}?person={{ c.submitter }}&page=1">
+                        <small class="teamus-blue-text">{{ c.submitter }}</small>
+                      </a>
+                    </strong>
+                    <small>commented on</small>
+                  </div>
+                  <div class="col-4 d-flex justify-content-end">
+                    <small class="text-muted">{{ c.created|date:"Y-m-d" }}</small>
+                  </div>
+                </div>
+                <a href="{% url 'photo:detail' c.photo.id %}" class="js-open-phot text-warning ps-2" data-photo-id="{{ c.photo.id }}">
+                  <strong>{{ c.photo.title }}</strong>
+                </a>
+                <div class="ps-2">{{ c.text|truncatechars:160 }}</div>
+              </div>
+            {% empty %}
+              <div class="text-muted">No recent comments.</div>
+            {% endfor %}
+          </div>
+
+          <div class="tab-pane fade" id="tab-favorites">
+            {% for f in recent_favorites %}
+              <div class="border-bottom border-secondary py-2 small">
+                <div>
+                  <a href="{% url 'photo:list' %}?favorites={{ f.user }}&page=1">
+                    <strong class="teamus-red-text">{{ f.user }}</strong>
+                  </a> favorited<br/>
+                  <a href="{% url 'photo:detail' f.favorite.id %}" class="js-open-photo" data-photo-id="{{ f.favorite.id }}">
+                    <strong class="text-warning">{{ f.favorite.title }}</strong>
+                  </a>
+                  {% if f.created %}<span class="text-muted">{{ f.created|date:"Y-m-d H:i" }}</span>{% endif %}
+                </div>
+              </div>
+            {% empty %}
+              <div class="text-muted">No recent favorites.</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer border-secondary">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

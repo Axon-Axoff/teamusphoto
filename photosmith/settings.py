@@ -11,11 +11,16 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 import os
 from pathlib import Path
-from decouple import config
+BASE_DIR = Path(__file__).resolve().parent.parent  # .../photosmith/photosmith
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+from decouple import Config, RepositoryEnv
+from decouple import config as decouple_config  # fallback
 
+ENV_FILE = BASE_DIR / '.env'
+if ENV_FILE.exists():
+    config = Config(RepositoryEnv(str(ENV_FILE)))
+else:
+    config = decouple_config
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -26,8 +31,31 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['www.teamusphoto.us','localhost','127.0.0.1',]
+ALLOWED_HOSTS = [
+    'teamusphoto.us',
+    'www.teamusphoto.us',
+    'localhost',
+    '127.0.0.1',
+]
 
+CSRF_TRUSTED_ORIGINS = [
+    # 'https://teamusphoto.us',
+    # 'https://www.teamusphoto.us',
+    # In dev ONLY:
+    'http://localhost',
+    'http://127.0.0.1',
+]
+
+# CSRF_COOKIE_DOMAIN    = '.teamusphoto.us'
+# SESSION_COOKIE_DOMAIN = '.teamusphoto.us'
+
+# SECURE_SSL_REDIRECT = True
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+#
+# CSRF_COOKIE_SECURE = True
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SAMESITE = 'Lax'
+# SESSION_COOKIE_SAMESITE = 'Lax'
 
 # Application definition
 
@@ -56,6 +84,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # 'photosmith.middleware.CanonicalHostMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',

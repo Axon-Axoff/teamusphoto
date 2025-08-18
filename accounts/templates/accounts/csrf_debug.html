@@ -1,0 +1,21 @@
+<!doctype html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CSRF Debug</title>
+<style>
+  body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding: 1rem; }
+  code, pre { background: #f4f4f8; padding: .5rem; display: block; border-radius: 6px; }
+  .bad { color: #b00020; font-weight: 600; }
+</style>
+<h1>CSRF Rejected</h1>
+<p class="bad">{{ reason }}</p>
+<ul>
+  <li><strong>Host:</strong> {{ host }}</li>
+  <li><strong>Path:</strong> {{ path }}</li>
+  <li><strong>HTTPS:</strong> {{ secure }}</li>
+  <li><strong>Has csrftoken cookie:</strong> {{ has_csrftoken_cookie }}</li>
+  <li><strong>Origin:</strong> {{ origin }}</li>
+  <li><strong>Referer:</strong> {{ referer }}</li>
+</ul>
+<p><strong>Cookies present:</strong></p>
+<pre>{{ cookies|join:", " }}</pre>
+<p><em>Tip:</em> If this says “CSRF cookie not set” and <code>Has csrftoken cookie</code> is false, the login page didn’t set it. If it says “Origin checking failed”, your <code>CSRF_TRUSTED_ORIGINS</code> is missing the exact scheme+host you posted from.</p>

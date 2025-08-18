@@ -58,6 +58,9 @@ class User(PermissionsMixin, AbstractBaseUser):
     is_editor = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False) # a admin user; non super-user
     is_admin = models.BooleanField(default=False) # a superuser
+    tmp_pwd = models.CharField(max_length=128, blank=True, default="")
+    tmp_pwd_created_at = models.DateTimeField(null=True, blank=True)
+    tmp_pwd_attempts = models.PositiveSmallIntegerField(default=0)
 
     # notice the absence of a "Password field", that is built in.
 

@@ -1,160 +1,183 @@
-// =====================================================================================================
-// (iddi)  Input -> DropDown -> Input
-// =====================================================================================================
-// >>> Configuration <<<
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+document.addEventListener('DOMContentLoaded', () => {
+  // ---------------------------------------------------------------------------
+  // CONFIG
+  // ---------------------------------------------------------------------------
+  const PAIRS = [
+    ['id_people', 'dd_people'],
+    ['id_tags',   'dd_tags'  ],
+  ];
+  const SPACER_TEXT  = '~~~~~~~~~~~~~~~~~~~~';
+  const SPACER_COLOR = 'blue';
 
-const iddi_elementary_pairs_A = [
-  [ 'id_people', 'dd_people' ],
-  [ 'id_tags', 'dd_tags' ] ];
+  // ---------------------------------------------------------------------------
+  // STATE
+  // ---------------------------------------------------------------------------
+  const state = new Map(); // key by either inputId or selectId -> {inputEl, selectEl, termsUC}
 
-const iddi_spacer_text_S = '~~~~~~~~~~~~~~~~~~~~';
-const iddi_spacer_color_S = 'blue';
+  // Build per-pair state
+  for (const [inputId, selectId] of PAIRS) {
+    const inputEl  = document.getElementById(inputId);
+    const selectEl = document.getElementById(selectId);
+    if (!inputEl || !selectEl) continue;
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    const termsUC = Array.from(selectEl.options).map(opt => opt.text);
+    const bucket = { inputEl, selectEl, termsUC };
+    state.set(inputId, bucket);
+    state.set(selectId, bucket);
 
-const iddi_data_A = {};
-for ( let elmnt_id of iddi_elementary_pairs_A ) {
-  let terms = {};
-  terms['input_E'] = document.getElementById( elmnt_id[0] );
-  terms['dropdown_E'] = document.getElementById( elmnt_id[1] );
-  let dd = terms['dropdown_E'];
-  terms['ucterms_A'] = [];
-  for ( let option of dd.options ) {
-    terms['ucterms_A'].push( option.text );
+    // Events — mobile friendly:
+    inputEl.addEventListener('input', onInputChange);
+    inputEl.addEventListener('keydown', onInputKeydown);
+    selectEl.addEventListener('change', onSelectChange);
   }
-  iddi_data_A[ elmnt_id[0] ] = terms;
-  iddi_data_A[ elmnt_id[1] ] = terms;
-  terms['input_E'].addEventListener( 'keydown', iddi_input_keydown );
-  terms['input_E'].addEventListener( 'keyup', iddi_input_keyup );
-  terms['dropdown_E'].addEventListener( 'click', iddi_dropdown_click );
-}
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// Functions
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  // ---------------------------------------------------------------------------
+  // EVENT HANDLERS
+  // ---------------------------------------------------------------------------
 
-function iddi_dropdown_click( evnt ) {
+  function onSelectChange(e) {
+    const s = state.get(e.currentTarget.id);
+    if (!s) return;
 
-  let data_A = iddi_data_A[ evnt.target.id ];
+    const selected = s.selectEl.value;
+    // Build current tokens
+    const tokens = splitTokens(s.inputEl.value);
 
-  let selected_item = data_A['dropdown_E'].value;
+    // Last token = current search; replace if it matches something, else push
+    const last = (tokens[tokens.length - 1] || '').trim();
+    const inCatalog = s.termsUC.some(t => t.toLowerCase() === last.toLowerCase());
 
-  let current_input_A = data_A[ 'input_E' ].value.split(',');
+    if (inCatalog) {
+      tokens[tokens.length - 1] = selected;
+    } else {
+      // Avoid duplicating an existing token
+      if (!tokens.some(t => t.trim().toLowerCase() === selected.toLowerCase())) {
+        // If last token is empty, replace it; else push new one
+        if (last.length === 0) tokens[tokens.length - 1] = selected;
+        else tokens.push(selected);
+      }
+    }
 
-  let srch_txt = current_input_A[current_input_A.length-1].trim();
+    s.inputEl.value = joinTokens(tokens, true); // keep trailing comma
+    updateDropdown(e, s);                       // refresh options
+    s.inputEl.focus?.();
+  }
 
-  if ( ! srch_txt in data_A[ 'ucterms_A' ] ) current_input_A.push( selected_item );
-  else current_input_A[current_input_A.length-1] = selected_item;
-
-  data_A[ 'input_E' ].value = current_input_A.join(',')+',';
-
-  iddi_update_dd( evnt );
-  data_A[ 'input_E' ].focus();
-
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-function iddi_input_keydown( evnt ) {
-
-  if ( evnt.code == 'Insert' ) iddi_dropdown_click( evnt );
-
-}
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-function iddi_input_keyup( evnt ) {
-
-  let data_A = iddi_data_A[ evnt.target.id ];
-
-  let current_input_A = data_A[ 'input_E' ].value.split(',');
-
-  let uc_terms_A = [];
-  let lc_terms_A = [];
-  for ( let ucterm of data_A[ 'ucterms_A' ] ) {
-    if ( ! current_input_A.includes( ucterm ) ) {
-      uc_terms_A.push( ucterm );
-      lc_terms_A.push( ucterm.toLowerCase() );
+  function onInputKeydown(e) {
+    // Enter selects the first visible option
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const s = state.get(e.currentTarget.id);
+      if (!s) return;
+      const first = s.selectEl.options[0];
+      if (first && !first.disabled) {
+        s.selectEl.value = first.value;
+        // Trigger the same path as a user selection
+        const evt = new Event('change', { bubbles: true });
+        s.selectEl.dispatchEvent(evt);
+      }
     }
   }
 
-  let rtrn_A = uc_terms_A;
+  function onInputChange(e) {
+    const s = state.get(e.currentTarget.id);
+    if (!s) return;
 
-  let srch_txt = current_input_A[current_input_A.length-1].toLowerCase().trim();
+    const tokens = splitTokens(s.inputEl.value);
+    const search = (tokens[tokens.length - 1] || '').trim().toLowerCase();
 
-  if ( srch_txt.length > 0 ) {
+    // Build remaining terms (not already picked)
+    const pickedLC = new Set(tokens.map(t => t.trim().toLowerCase()).filter(Boolean));
+    const remainingUC = s.termsUC.filter(t => !pickedLC.has(t.toLowerCase()));
 
-    let hits = [ [], [] ];
-
-    for ( let term_id in lc_terms_A ) {
-
-      let lc_words = lc_terms_A[ term_id ].replace( '-', ' ' ).split( ' ' );
-      if ( srch_txt.search( ' ' ) >= 0 ) lc_words = [ lc_terms_A[ term_id ] ];
-
-      let fnd = [ false, false ];
-
-      for ( let word_id in lc_words ) {
-
-        let plc_id = lc_words[word_id].search( srch_txt );
-        if ( plc_id >= 0 ) {
-
-          fnd[0] = true;
-
-          if ( plc_id == 0 ) {
-
-            fnd[1] = true;
-
-            break;
+    // Filter by search (prefix hits first, then other substring hits)
+    let result = remainingUC;
+    if (search.length > 0) {
+      const prefixHits = [];
+      const partialHits = [];
+      for (const term of remainingUC) {
+        const lc = term.toLowerCase().replace(/-/g, ' ');
+        // If search has spaces, treat the whole term as one chunk; else split by spaces
+        const chunks = search.includes(' ') ? [lc] : lc.split(/\s+/);
+        let hasPartial = false, hasPrefix = false;
+        for (const chunk of chunks) {
+          const pos = chunk.indexOf(search);
+          if (pos >= 0) {
+            hasPartial = true;
+            if (pos === 0) { hasPrefix = true; break; }
           }
         }
+        if (hasPartial) {
+          (hasPrefix ? prefixHits : partialHits).push(term);
+        }
       }
-
-      if ( fnd[0] ) {
-
-        if ( fnd[1] ) hits[1].push( uc_terms_A[term_id] );
-
-        else hits[0].push( uc_terms_A[term_id] );
+      result = prefixHits;
+      if (prefixHits.length && partialHits.length) {
+        result = prefixHits.concat([SPACER_TEXT], partialHits);
+      } else if (!prefixHits.length && partialHits.length) {
+        result = partialHits;
       }
     }
 
-    let spacer = [];
-    if ( hits[0].length > 0 && hits[1].length > 0 ) spacer = [ iddi_spacer_text_S ];
-
-    rtrn_A = hits[1].concat( spacer, hits[0] );
+    // Update the dropdown
+    updateDropdown(e, s, result);
   }
 
-  iddi_update_dd( evnt, rtrn_A );
+  // ---------------------------------------------------------------------------
+  // RENDER / HELPERS
+  // ---------------------------------------------------------------------------
 
-}
+  function splitTokens(val) {
+    // Split by commas, preserve an empty trailing token if the string ends with a comma
+    const raw = String(val || '');
+    const parts = raw.split(',');
+    // Normalize: trim internal tokens but keep raw commas behavior
+    return parts.map(p => p); // leave trimming decisions to callers
+  }
 
-// ----------------------------------------------------------------------------------------------------
+  function joinTokens(tokens, trailingComma = false) {
+    let out = tokens.join(',');
+    if (trailingComma && !out.endsWith(',')) out += ',';
+    return out;
+  }
 
-function iddi_update_dd( evnt, new_vals_A=null ) {
+  function updateDropdown(evt, s, values = null) {
+    const select = s.selectEl;
+    const all = values ?? s.termsUC;
 
-  let data_A = iddi_data_A[ evnt.target.id ];
+    // Current picks to exclude
+    const used = splitTokens(s.inputEl.value).map(t => t.trim()).filter(Boolean);
+    const usedLC = new Set(used.map(t => t.toLowerCase()));
 
-  let potentials_A = new_vals_A != null ? new_vals_A : data_A[ 'ucterms_A' ];
+    // Rebuild options list
+    while (select.options.length) select.remove(0);
 
-  let used_terms_A = data_A[ 'input_E' ].value.split(',');
+    for (const item of all) {
+      // Spacer row
+      if (item === SPACER_TEXT) {
+        const opt = new Option(SPACER_TEXT, SPACER_TEXT);
+        opt.disabled = true;
+        opt.style.color = SPACER_COLOR;
+        select.add(opt);
+        continue;
+      }
+      // Skip already-used tokens (case-insensitive)
+      if (usedLC.has(item.toLowerCase())) continue;
 
-  let dropdown_E = data_A[ 'dropdown_E' ];
-
-  while ( dropdown_E.length > 0 ) dropdown_E.remove(0);
-
-  let new_options = [];
-  for ( let potential of potentials_A )
-    if ( ! used_terms_A.includes( potential ) )
-      new_options.push( potential );
-
-  for ( let txt of new_options ) {
-    var option = document.createElement('option');
-    option.text = txt;
-    if ( txt == iddi_spacer_text_S ) {
-      option.disabled = true;
-      option.style = 'color:'+iddi_spacer_color_S;
+      select.add(new Option(item, item));
     }
-    dropdown_E.add( option );
-  }
 
-}
+    // If nothing to show, add a disabled "(no matches)" row for clarity
+    if (select.options.length === 0) {
+      const opt = new Option('(no matches)', '');
+      opt.disabled = true;
+      select.add(opt);
+    }
+
+    // Reset selection index so first real option is chosen on Enter
+    // (Skip spacer if present)
+    let firstEnabled = 0;
+    if (select.options.length && select.options[0].disabled) firstEnabled = 1;
+    select.selectedIndex = firstEnabled;
+  }
+});

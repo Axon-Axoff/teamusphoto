@@ -2,42 +2,59 @@
 {% load crispy_forms_tags %}
 
 {% block body %}
-<div class="mx-auto">
-  <h1 class="mt-3 text-center">Edit photo {{photo}}</h1>
-</div>
-<div class="row">
-  <div class="col-4">
-    <img src="{{ photo.image.url }}" class="w-100 mt-4 mb-4" alt="">
+<div class="add_update_container teamus-gray-bg p-2">
+  <div class="mx-auto update_title_container mb-3">
+    <h1 class="text-center text-dark">Edit {{ photo }}</h1>
   </div>
-  <div class="col-8">
+  <div class="mx-auto mb-3">
+    <img src="{{ photo.image.url }}" class="w-100" alt="">
+  </div>
+  <div class="mx-auto mb-3">
     <div class="form-group">
       <form action="" method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        <div id="div_id_title" class="form-group mb-4">
-          <label for="id_title" class=" requiredField"><strong>Title<span class="asteriskField">*</span> (Keep short)</strong></label>
+        <div id="div_id_title" class="form-group mb-3">
+          <label for="id_title" class="requiredField"><strong>Title </strong>
+            <small class="teamus-dark-gray-text">(Short but sweet)</small><span class="text-danger">*</span>
+          </label>
           <div>
             <input type="text" name="title" value="{{ form.title.value }}"maxlength="64" class="textinput textInput form-control" required id="id_title">
           </div>
         </div>
-        <div id="div_id_description" class="form-group mb-4">
-          <label for="id_description" class=" requiredField"><strong>Description<span class="asteriskField">*</span>
-            (A more verbose description)</strong>
+        <div id="div_id_description" class="form-group mb-3">
+          <label for="id_description" class="requiredField">
+            <strong>Description </strong>
+            <small class="teamus-dark-gray">
+            (A more verbose description)
+            </small>
+            <span class="text-danger">*</span>
           </label>
-          <div>
-            <input type="text" name="description" value="{{ form.description.value }}" maxlength="255" class="textinput textInput form-control" required id="id_description">
-          </div>
+          <textarea
+            id="id_description"
+            name="description"
+            class="form-control"
+            rows="4"
+            maxlength="255"
+            required
+          >{{ form.description.value }}</textarea>
         </div>
-        <div id="div_id_year" class="form-group mb-4">
-          <label for="id_year" class="requiredField"><strong>Year<span class="asteriskField">*</span>
-            (Approximate year photo was taken, enter '?' if unknown)</strong>
+        <div id="div_id_year" class="form-group mb-3">
+          <label for="id_year" class="requiredField">
+            <strong>Year </strong>
+            <small class="teamus-dark-gray-text">
+            (Best guess of year photo was taken or ?)
+            </small>
+            <span class="text-danger">*</span>
           </label>
           <div>
             {{ form.year }}
           </div>
         </div>
-        <div id="div_id_people" class="form-group mb-4">
-          <label for="id_people" class="requiredField"><strong>People<span class="asteriskField">*</span>
-            (Full Names, comma separated, or None. No symbols or punctuation. Choose from list below or add new person.)</strong>
+        <div id="div_id_people" class="form-group mb-3">
+          <label for="id_people" class="requiredField"><strong>People </strong>
+            <small class="teamus-dark-gray-text">(Full Names, comma separated, or None. No symbols or punctuation.
+            Choose below or add new person.)</small>
+            <span class="text-danger">*</span>
           </label>
           <div>
             <input type="text" name="people" value="{% for person in form.people.value %}{{ person }},{% endfor %}"
@@ -47,12 +64,13 @@
                 <option>{{ person.name }}</option>
               {% endfor %}
             </select>
-            <small id="hint_id_people" class="form-text text-dark mb-4">A comma-separated list of tags.</small>
+            <small id="hint_id_people" class="form-text teamus-dark-gray-text mb-4">A comma-separated list of tags.</small>
           </div>
         </div>
-        <div id="div_id_tags" class="form-group mb-4">
-          <label for="id_tags" class="requiredField"><strong>Tags<span class="asteriskField">*</span>
-            (Tags other than people or year, comma separated, no symbols or punctuation. Choose from list below or make new tag)</strong>
+        <div id="div_id_tags" class="form-group mb-3">
+          <label for="id_tags" class="requiredField"><strong>Tags </strong>
+            <small class="teamus-dark-gray-text">(Tags other than people or year, comma separated, no symbols or punctuation.
+            Choose below or add new tag)</small><span class="text-danger">*</span>
           </label>
           <div>
             <input type="text" name="tags" value="{% for tag in form.tags.value %}{{ tag }},{% endfor %}" 
@@ -62,7 +80,7 @@
                 <option>{{ tag.name }}</option>
               {% endfor %}
             </select>
-            <small id="hint_id_tags" class="form-text text-dark">A comma-separated list of tags.</small>
+            <small id="hint_id_tags" class="form-text teamus-dark-gray-text">A comma-separated list of tags.</small>
           </div>
         </div>
         <button type="submit" class="btn btn-success mb-3">Edit Photo</button>
@@ -71,5 +89,4 @@
     </div>
   </div>
 </div>
-
 {% endblock body %}

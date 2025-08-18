@@ -9,4 +9,5 @@ urlpatterns = [
     path('register/', views.register_one, name='register_one'),
     path('register/photoappuser/', views.SignUp.as_view(), name='register'),
     path('members/', views.member_list_view, name='member_list'),
+    path('register/updatepwd/', views.update_pwd, name='update_pwd'),
 ]

@@ -17,13 +17,13 @@ class Year(models.Model):
     def __str__(self):
         return self.year
 
+
 class GenericTag(TagBase):
 
     class Meta:
         verbose_name = _("Tag")
         verbose_name_plural = _("Tags")
 
-    # ... methods (if any) here
 
 class PeopleTag(TagBase):
 
@@ -31,7 +31,6 @@ class PeopleTag(TagBase):
         verbose_name = _("Person")
         verbose_name_plural = _("People")
 
-    # ... methods (if any) here
 
 class TaggedGeneric(GenericTaggedItemBase):
     tag = models.ForeignKey(
@@ -39,6 +38,7 @@ class TaggedGeneric(GenericTaggedItemBase):
         on_delete=models.CASCADE,
         related_name="%(app_label)s_%(class)s_items",
     )
+
 
 class TaggedPeople(GenericTaggedItemBase):
     tag = models.ForeignKey(
@@ -89,7 +89,7 @@ class Photo(models.Model):
                         elif exif[orientation] == 8:
                             img = img.rotate(90, expand=True)
 
-            img.thumbnail((360, 360), Image.LANCZOS)  # Use LANCZOS for better quality
+            img.thumbnail((360, 360), Image.LANCZOS)  # LANCZOS for better quality
             output = BytesIO()
 
             # Determine the format for saving the thumbnail
@@ -108,7 +108,7 @@ class Photo(models.Model):
                 format_type = 'JPEG'  # Default file type
 
             # Save the thumbnail to the buffer in the determined format
-            img.save(output, format=format_type, quality=95)  # Adjust quality as needed
+            img.save(output, format=format_type, quality=95)
             output.seek(0)
 
             # Create a Django File object from the buffer
@@ -120,6 +120,7 @@ class Photo(models.Model):
     def __str__(self):
         return self.title
 
+
 class Comment(models.Model):
     photo = models.ForeignKey(Photo, related_name='comments', on_delete=models.CASCADE)
     submitter = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
@@ -128,6 +129,11 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.photo.title
+
+    class Meta:
+        # Oldest → newest:
+        ordering = ['created', 'id']
+
 
 class Favorite(models.Model):
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)

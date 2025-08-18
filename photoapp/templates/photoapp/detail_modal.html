@@ -1,0 +1,194 @@
+<style>
+  .swap-fade { opacity: 0; transition: opacity 160ms ease; }
+  .swap-fade.show { opacity: 1; }
+  .modal-body { backface-visibility: hidden; }
+</style>
+
+<!-- Bootstrap 5 Modal -->
+<div class="modal fade" id="photoDetailModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true" data-photo-id="{{ photo.id }}">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content bg-dark text-light">
+
+      <!-- Prev/Next controls -->
+      <button type="button"
+              id="photoPrevBtn"
+              class="btn btn-outline-light position-fixed rounded-circle d-flex align-items-center justify-content-center"
+              aria-label="Previous photo"
+              style="top:100px; left:10px; width:44px; height:44px; z-index:1060; opacity:.9;">
+        <img src="/media/leftarrow.webp">
+      </button>
+
+      <button type="button"
+              id="photoNextBtn"
+              class="btn btn-outline-light position-fixed rounded-circle d-flex align-items-center justify-content-center"
+              aria-label="Next photo"
+              style="top:100px; right:25px; width:44px; height:44px; z-index:1060; opacity:.9;">
+        <img src="/media/rightarrow.webp">
+      </button>
+
+
+      <!-- Body -->
+      <div class="modal-body overflow-auto p-0">
+        <div class="js-modal-swap swap-fade show">
+
+          <!-- Header -->
+          <div class="modal-header border-secondary sticky-top bg-dark w-100">
+            <h5 class="modal-title teamus-yellow text-center" id="photoModalLabel">
+              {{ photo.title }} [{{ photo.year }}]
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <!-- Image -->
+          <a href="{{ photo.image.url }}">
+          <figure class="m-0">
+            <img
+              src="{% if photo.image.url %}{{ photo.image.url }}{% else %}{{ MEDIA_URL }}{{ photo.image }}{% endif %}"
+              alt="{{ photo.title }}"
+              class="img-fluid modal-photo"
+            >
+            {% if photo.caption %}
+              <figcaption class="p-2 text-muted small">{{ photo.caption }}</figcaption>
+            {% endif %}
+          </figure>
+          </a>
+
+          <!-- Details -->
+          <div class="modal_container p-3">
+
+            <p class="text-center fw-light small">Uploaded on: {{photo.created|date:'N d Y'}} by
+              <a href="{% url 'photo:list' %}?member={{ photo.submitter.first_name }} {{ photo.submitter.last_name }}
+              &page=1" class="teamus-yellow fw-bold">{{photo.submitter.first_name}} {{ photo.submitter.last_name }}</a>
+            {% if photo.edited_by %}<br/>
+              <span class="text-white">Edited by:
+              <a href="{% url 'photo:list' %}?member={{ photo.edited_by.first_name }} {{ photo.edited_by.last_name}}
+              &page=1" class="text-white fw-bold">{{ photo.edited_by.first_name }} {{ photo.edited_by.last_name }}</a>
+              </span>
+            {% endif %}
+            </p>
+
+            {% if photo.description %}
+              <h6 class="fw-bold">Description:</h6>
+              <p>{{ photo.description }}</p>
+            {% endif %}
+
+            <!-- Favorites -->
+            <div class="mb-3">
+              <h6 class="fw-bold">Favorites:</h6>
+              <form class="me-3 fav-form" method="post" data-photo-id="{{ photo.id }}">
+                {% csrf_token %}
+                {% if is_favorite %}
+                <input type="hidden" name="remove" value="remove">
+                <button type="submit" class="btn btn-outline-light teamus-red-text btn-sm">♡ Remove Favorite</button>
+                {% else %}
+                <input type="hidden" name="add" value="add">
+                <button type="submit" class="btn btn-outline-light teamus-red-text btn-sm">♥ Add to Favorites</button>
+                {% endif %}
+              </form>
+              {% for fav in favorites %}
+              <a href="{% url 'photo:list' %}?favorites={{ fav.user.first_name }} {{ fav.user.last_name }}&page=1">
+                <span class="badge teamus-darker-bg teamus-red-text me-1">
+                  {{ fav.user.first_name }} {{ fav.user.last_name }}
+                </span>
+              </a>
+              {% endfor %}
+            </div>
+
+            {% if photo.tags.all %}
+              <h6 class="fw-bold">Tags:</h6>
+              <div class="mb-3">
+                {% for tag in photo.tags.all %}
+                  <a href="{% url 'photo:list' %}?tag={{ tag.name }}&page=1">
+                    <span class="badge teamus-darker-bg me-1 teamus-blue-text">{{ tag.name }}</span>
+                  </a>
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            <h6 class="fw-bold">People:</h6>
+              <div class="mb-3">
+              {% for person in photo.people.all %}
+                <a href="{% url 'photo:list' %}?person={{ person.name }}&page=1">
+                  <span class="badge teamus-darker-bg me-1 teamus-green-text">{{person.name}}</span>
+                </a>
+              {% endfor %}
+              </div>
+
+            {% if user.is_editor %}
+              <p class="text-center">
+                See something wrong?<br/>
+                <a href="{% url 'photo:update' photo.id %}" class="px-2">
+                  <button class="btn btn-sm btn-warning">Edit details here</button>
+                </a>
+              </p>
+                {% if user == photo.submitter %}
+              <p class="text-center mb-3">
+                <a href="{% url 'photo:delete' photo.id %}" class="px-2">
+                  <button class="btn btn-sm btn-danger">Delete</button>
+                </a>
+              </p>
+                {% endif %}
+            {% endif %}
+
+            <!-- Comments -->
+            <h6 class="fw-bold">Comments ({{ comments|length }})</h6>
+            <ul class="list-group list-group-flush mb-3">
+              {% for c in comments %}
+                <li class="list-group-item text-light teamus-dark-gray-bg mb-2"
+                    style="border-radius:4px" data-comment-id="{{ c.id }}">
+                  <div class="d-flex justify-content-between small">
+                    <span class="fw-bold text-warning">{{ c.submitter }}</span>
+                    <span class="text-muted">{{ c.created|date:"Y-m-d" }}</span>
+                  </div>
+
+                  <!-- View mode -->
+                  <p class="mb-0 js-comment-text">{{ c.text }}</p>
+
+                  {% if user == c.submitter or user.is_staff %}
+                    <!-- Action buttons (view mode) -->
+                    <div class="mt-2 d-flex gap-2 justify-content-end js-comment-actions">
+                      <button type="button" class="btn btn-sm btn-warning js-edit-comment">Edit</button>
+
+                      <form class="d-inline comment-delete-form" method="post" action="{% url 'photo:delete_comment' c.id %}">
+                        {% csrf_token %}
+                        <button class="btn btn-sm btn-danger">Delete</button>
+                      </form>
+                    </div>
+
+                    <!-- Edit form (hidden by default) -->
+                    <div class="mt-2 js-edit-form d-none">
+                      <form class="comment-edit-form" method="post" action="{% url 'photo:edit_comment' c.id %}">
+                        {% csrf_token %}
+                        <textarea name="text" class="form-control form-control-sm" rows="3">{{ c.text }}</textarea>
+                        <div class="text-end mt-2">
+                          <button class="btn btn-sm btn-primary">Save</button>
+                          <button type="button" class="btn btn-sm btn-secondary js-cancel-edit">Cancel</button>
+                        </div>
+                      </form>
+                    </div>
+                  {% endif %}
+                </li>
+              {% empty %}
+                <li class="list-group-item bg-dark text-light border-secondary">No comments yet.</li>
+              {% endfor %}
+            </ul>
+
+
+            <!-- Comment form -->
+            <form class="comment-form" method="post" data-photo-id="{{ photo.id }}">
+              {% csrf_token %}
+              <input type="hidden" name="comment" value="comment">
+              <div class="mb-3">
+                <label for="comment-text-{{ photo.id }}" class="form-label">Add a comment</label>
+                <textarea class="form-control bg-dark text-light border-secondary" id="comment-text-{{ photo.id }}" name="text" rows="3" required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary btn-sm">Post Comment</button>
+            </form>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

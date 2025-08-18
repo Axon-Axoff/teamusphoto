@@ -1,45 +1,225 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
+{% load static %}
 
 {% block body %}
-<div class="mx-auto">
-  <h1 class="mt-3 text-center">Add photo (5mb or less please)</h1>
+<div class="add_update_container teamus-gray-bg" style="border-radius: 8px; padding: 10px;">
+<div class="mx-auto add_title_container mb-3">
+  <h1 class="text-center">Add photo</h1>
 </div>
 <div class="form-group">
   <form action="" method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    <div id="div_id_image" class="form-group mb-4">
-      <label for="id_image" class=" requiredField"><strong>Image (up to 5mb)<span class="asteriskField">*</span></strong></label>
-      <div>
-        <input type="file" name="image" accept="image/*" class="clearablefileinput form-control-file" required id="id_image">
-        <div id="image-here"></div>
+    <div class="mb-4">
+      <label for="id_image" class="form-label fw-semibold">
+        <strong>Image </strong><small class="teamus-dark-gray-text">(max 5 MB)</small><span class="text-danger">*</span>
+      </label>
+
+      <!-- Keep the real input for form submission, but hide it -->
+      <input type="file"
+             name="image"
+             id="id_image"
+             accept="image/*"
+             class="form-control d-none"
+             required>
+
+      <div id="imageDrop" class="upload-dropzone" role="button" tabindex="0"
+           aria-controls="id_image" aria-describedby="imageHelp">
+        <div class="text-center">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 16V8m0 0l-3 3m3-3l3 3M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"
+                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div class="mt-2 fw-semibold">Drag & drop an image here</div>
+          <div class="small teamus-dark-gray-text">or click to browse<br/>JPG/PNG/WebP</div>
+        </div>
       </div>
+
+      <div id="imageHelp" class="form-text teamus-dark-gray-text">Images larger than 5 MB will be resized.</div>
+
+      <!-- Preview -->
+      <div id="imagePreview" class="mt-3 d-none">
+        <img class="img-fluid rounded shadow-sm" alt="Selected image preview">
+        <div class="small mt-2 text-dark">
+          <span class="file-name"></span> · <span class="file-size"></span>
+        </div>
+        <button type="button" id="clearImage" class="btn btn-sm btn-dark mt-2">Remove</button>
+      </div>
+
+      <!-- Inline error -->
+      <div id="imageError" class="invalid-feedback d-block d-none"></div>
     </div>
+
     <div id="div_id_title" class="form-group mb-4">
-      <label for="id_title" class=" requiredField"><strong>Title<span class="asteriskField">*</span> (Keep short)</strong></label>
+      <label for="id_title" class="requiredField"><strong>Title </strong>
+        <small class="teamus-dark-gray-text">(Short but sweet)</small><span class="text-danger">*</span></label>
       <div>
         <input type="text" name="title" maxlength="64" class="textinput textInput form-control" required id="id_title">
       </div>
     </div>
     <div id="div_id_description" class="form-group mb-4">
-      <label for="id_description" class=" requiredField"><strong>Description<span class="asteriskField">*</span>
-        (A more verbose description)</strong>
+      <label for="id_description" class="requiredField">
+        <strong>Description </strong>
+        <small style="color: #333333;">
+        (A more verbose description)
+        </small>
+        <span class="text-danger">*</span>
       </label>
-      <div>
-        <input type="text" name="description" maxlength="255" class="textinput textInput form-control" required id="id_description">
-      </div>
+      <textarea
+        id="id_description"
+        name="description"
+        class="form-control"
+        rows="4"
+        maxlength="255"
+        required
+      ></textarea>
     </div>
     <div id="div_id_year" class="form-group mb-4">
-      <label for="id_year" class="requiredField"><strong>Year<span class="asteriskField">*</span>
-        (Approximate year photo was taken, enter '?' if unknown)</strong>
+      <label for="id_year" class="requiredField">
+        <strong>Year </strong>
+        <small class="teamus-dark-gray-text">
+        (Best guess of year photo was taken or ?)
+        </small>
+        <span class="text-danger">*</span>
       </label>
-      <div>
-        {{ form.year }}
-      </div>
+      <select name="year" class="teamus_year" required id="id_year">
+        <option value="" selected>---------</option>
+        <option value="126">?</option>
+        <option value="129">2026</option>
+        <option value="128">2025</option>
+        <option value="127">2024</option>
+        <option value="28">2023</option>
+        <option value="29">2022</option>
+        <option value="30">2021</option>
+        <option value="31">2020</option>
+        <option value="32">2019</option>
+        <option value="33">2018</option>
+        <option value="34">2017</option>
+        <option value="35">2016</option>
+        <option value="36">2015</option>
+        <option value="37">2014</option>
+        <option value="38">2013</option>
+        <option value="39">2012</option>
+        <option value="40">2011</option>
+        <option value="41">2010</option>
+        <option value="42">2009</option>
+        <option value="43">2008</option>
+        <option value="44">2007</option>
+        <option value="45">2006</option>
+        <option value="46">2005</option>
+        <option value="47">2004</option>
+        <option value="48">2003</option>
+        <option value="2">2002</option>
+        <option value="49">2001</option>
+        <option value="50">2000</option>
+        <option value="51">1999</option>
+        <option value="52">1998</option>
+        <option value="53">1997</option>
+        <option value="54">1996</option>
+        <option value="55">1995</option>
+        <option value="125">1994</option>
+        <option value="124">1993</option>
+        <option value="123">1992</option>
+        <option value="122">1991</option>
+        <option value="121">1990</option>
+        <option value="120">1989</option>
+        <option value="119">1988</option>
+        <option value="118">1987</option>
+        <option value="117">1986</option>
+        <option value="116">1985</option>
+        <option value="115">1984</option>
+        <option value="114">1983</option>
+        <option value="113">1982</option>
+        <option value="112">1981</option>
+        <option value="111">1980</option>
+        <option value="110">1979</option>
+        <option value="109">1978</option>
+        <option value="108">1977</option>
+        <option value="107">1976</option>
+        <option value="106">1975</option>
+        <option value="105">1974</option>
+        <option value="104">1973</option>
+        <option value="103">1972</option>
+        <option value="102">1971</option>
+        <option value="101">1970</option>
+        <option value="100">1969</option>
+        <option value="99">1968</option>
+        <option value="98">1967</option>
+        <option value="97">1966</option>
+        <option value="96">1965</option>
+        <option value="95">1964</option>
+        <option value="94">1963</option>
+        <option value="93">1962</option>
+        <option value="92">1961</option>
+        <option value="91">1960</option>
+        <option value="90">1959</option>
+        <option value="89">1958</option>
+        <option value="88">1957</option>
+        <option value="87">1956</option>
+        <option value="86">1955</option>
+        <option value="85">1954</option>
+        <option value="84">1953</option>
+        <option value="83">1952</option>
+        <option value="82">1951</option>
+        <option value="81">1950</option>
+        <option value="80">1949</option>
+        <option value="79">1948</option>
+        <option value="78">1947</option>
+        <option value="77">1946</option>
+        <option value="76">1945</option>
+        <option value="75">1944</option>
+        <option value="74">1943</option>
+        <option value="73">1942</option>
+        <option value="72">1941</option>
+        <option value="71">1940</option>
+        <option value="70">1939</option>
+        <option value="69">1938</option>
+        <option value="68">1937</option>
+        <option value="67">1936</option>
+        <option value="66">1935</option>
+        <option value="65">1934</option>
+        <option value="64">1933</option>
+        <option value="63">1932</option>
+        <option value="62">1931</option>
+        <option value="61">1930</option>
+        <option value="60">1929</option>
+        <option value="59">1928</option>
+        <option value="58">1927</option>
+        <option value="57">1926</option>
+        <option value="56">1925</option>
+        <option value="27">1924</option>
+        <option value="26">1923</option>
+        <option value="25">1922</option>
+        <option value="24">1921</option>
+        <option value="23">1920</option>
+        <option value="22">1919</option>
+        <option value="21">1918</option>
+        <option value="20">1917</option>
+        <option value="19">1916</option>
+        <option value="18">1915</option>
+        <option value="17">1914</option>
+        <option value="16">1913</option>
+        <option value="15">1912</option>
+        <option value="14">1911</option>
+        <option value="13">1910</option>
+        <option value="12">1909</option>
+        <option value="11">1908</option>
+        <option value="10">1907</option>
+        <option value="9">1906</option>
+        <option value="8">1905</option>
+        <option value="7">1904</option>
+        <option value="6">1903</option>
+        <option value="5">1902</option>
+        <option value="4">1901</option>
+        <option value="3">1900</option>
+        <option value="1">1800s</option>
+      </select>
     </div>
     <div id="div_id_people" class="form-group mb-4">
-      <label for="id_people" class="requiredField"><strong>People<span class="asteriskField">*</span>
-        (Full Names, comma separated, or None. No symbols or punctuation. Choose from list below or add new person.)</strong>
+      <label for="id_people" class="requiredField"><strong>People </strong>
+        <small class="teamus-dark-gray-text">(Full Names, comma separated, or None. No symbols or punctuation.
+          Choose below or add new person.)</small>
+        <span class="text-danger">*</span>
       </label>
       <div>
         <input type="text" name="people" class="tagwidget form-control" required id="id_people">
@@ -48,12 +228,13 @@
             <option>{{ person.name }}</option>
           {% endfor %}
         </select>
-        <small id="hint_id_people" class="form-text text-dark mb-4">A comma-separated list of tags.</small>
+        <small id="hint_id_people" class="form-text teamus-dark-gray-text mb-4">A comma-separated list of tags.</small>
       </div>
     </div>
     <div id="div_id_tags" class="form-group mb-4">
-      <label for="id_tags" class="requiredField"><strong>Tags<span class="asteriskField">*</span>
-        (Tags other than people or year, comma separated, no symbols or punctuation. Choose from list below or make new tag)</strong>
+      <label for="id_tags" class="requiredField"><strong>Tags </strong>
+        <small class="teamus-dark-gray-text">(Tags other than people or year, comma separated, no symbols or punctuation.
+        Choose below or add new tag)</small><span class="text-danger">*</span>
       </label>
       <div>
         <input type="text" name="tags" class="tagwidget form-control" required id="id_tags">
@@ -62,31 +243,133 @@
             <option>{{ tag.name }}</option>
           {% endfor %}
         </select>
-        <small id="hint_id_tags" class="form-text text-dark">A comma-separated list of tags.</small>
+        <small id="hint_id_tags" class="form-text teamus-dark-gray-text">A comma-separated list of tags.</small>
       </div>
     </div>
-
     <button type="submit" class="btn btn-success mb-4">Add Photo</button>
   </form>
 </div>
+</div>
 <style>
-#image-here{
-  width: 400px;
-  height: 400px;
-  border: 1px solid black;
-  background-position: center;
-  background-size: cover;
-}
-</style>
-<script>
-const image_input = document.querySelector("#id_image");image_input.addEventListener("change", function() {
-  const reader = new FileReader();
-  reader.addEventListener("load", () => {
-    const uploaded_image = reader.result;
-    document.querySelector("#image-here").style.backgroundImage = `url(${uploaded_image})`;
-  });
-  reader.readAsDataURL(this.files[0]);
-});
+  .upload-dropzone{
+    border: 2px dashed var(--bs-border-color, #dee2e6);
+    border-radius: 12px;
+    padding: 24px;
+    min-height: 140px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: border-color .2s, background-color .2s, box-shadow .2s;
+    background: rgba(0,0,0,.02);
+  }
+  /* Looks good on dark themes too */
+  .bg-dark .upload-dropzone { background: rgba(255,255,255,.03); border-color: rgba(255,255,255,.15); }
 
+  .upload-dropzone:hover,
+  .upload-dropzone:focus {
+    outline: 0;
+    border-color: var(--bs-primary);
+    background: rgba(var(--bs-primary-rgb, 13,110,253), .05);
+    box-shadow: 0 0 0 .25rem rgba(var(--bs-primary-rgb, 13,110,253), .15);
+  }
+  .upload-dropzone.is-dragover {
+    border-color: var(--bs-warning);
+    background: rgba(var(--bs-warning-rgb,255,193,7), .08);
+  }
+  #imagePreview img { max-height: 360px; object-fit: contain; }
+</style>
+
+<script type="text/javascript" src="{% static 'js/photosmith.js' %}"></script>
+<script>
+(() => {
+  const input   = document.getElementById('id_image');
+  const drop    = document.getElementById('imageDrop');
+  const preview = document.getElementById('imagePreview');
+  const imgEl   = preview.querySelector('img');
+  const nameEl  = preview.querySelector('.file-name');
+  const sizeEl  = preview.querySelector('.file-size');
+  const clearBt = document.getElementById('clearImage');
+  const errEl   = document.getElementById('imageError');
+
+  const MAX_BYTES = 5 * 1024 * 1024;
+
+  // Click / keyboard to open file picker
+  drop.addEventListener('click', () => input.click());
+  drop.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.click(); }
+  });
+
+  // Drag & drop
+  ['dragenter','dragover'].forEach(t => drop.addEventListener(t, e => {
+    e.preventDefault(); e.stopPropagation(); drop.classList.add('is-dragover');
+  }));
+  ['dragleave','drop'].forEach(t => drop.addEventListener(t, e => {
+    e.preventDefault(); e.stopPropagation(); drop.classList.remove('is-dragover');
+  }));
+  drop.addEventListener('drop', e => {
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      // assign to the real input so the form submits it
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      input.files = dt.files;
+      handleFile(file);
+    }
+  });
+
+  // Picker change
+  input.addEventListener('change', () => {
+    const file = input.files?.[0];
+    if (file) handleFile(file);
+  });
+
+  // Remove/clear
+  clearBt.addEventListener('click', () => {
+    input.value = '';
+    imgEl.src = '';
+    preview.classList.add('d-none');
+    hideError();
+  });
+
+  function handleFile(file) {
+    hideError();
+    if (!file.type.startsWith('image/')) {
+      showError('Please choose an image file (JPG, PNG, or WebP).');
+      resetPreview();
+      return;
+    }
+    if (file.size > MAX_BYTES) {
+      showError('File is over 5 MB. Please choose a smaller image.');
+      resetPreview();
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    imgEl.onload = () => URL.revokeObjectURL(url);
+    imgEl.src = url;
+    nameEl.textContent = file.name;
+    sizeEl.textContent = formatBytes(file.size);
+    preview.classList.remove('d-none');
+  }
+
+  function resetPreview() {
+    input.value = '';
+    imgEl.src = '';
+    preview.classList.add('d-none');
+  }
+
+  function showError(msg) {
+    errEl.textContent = msg;
+    errEl.classList.remove('d-none');
+  }
+  function hideError() {
+    errEl.textContent = '';
+    errEl.classList.add('d-none');
+  }
+  function formatBytes(b) {
+    const units = ['B','KB','MB','GB']; let i=0, n=b;
+    while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
+    return `${n.toFixed(i ? 1 : 0)} ${units[i]}`;
+  }
+})();
 </script>
+
 {% endblock body %}

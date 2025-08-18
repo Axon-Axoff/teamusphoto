@@ -1,25 +1,61 @@
 {% extends 'base.html' %}
 
 {% block body %}
-<div class="container">
-  <h3>Members:</h3>
+<div class="add_update_container">
+  <div class="mx-auto add_title_container mb-3">
+    <h1 class="text-center text-warning">Members</h1>
+  </div>
+  <div class="all-members-container mb-5">
   {% for member in members %}
-  <strong><a href="{% url 'photo:list' %}?member={{ member.first_name }} {{ member.last_name}}&page=1"
-    class="text-dark">
-  {{ member.first_name }} {{ member.last_name }}</a> </strong>
+    <div class="member-container mb-3 w-100">
+      <h2 class="text-light text-center">
+      {{ member.first_name }} {{ member.last_name }}
+      </h2>
+      <div class="row g-3 w-100">
+
     {% for key, value in member_photos.items %}
       {% if key == member.id %}
-        (<strong>{{ value }}</strong>) photos uploaded.
+        <div class="col-4">
+        <small style="width:100px;">
+          <a href="{% url 'photo:list' %}?member={{ member.first_name }} {{ member.last_name}}&page=1"
+             class="w-100 text-warning">
+             <div class="text-center">Uploads</div>
+             <div class="text-center">(<strong>{{ value }}</strong>)</div>
+          </a>
+        </small>
+        </div>
+      {% endif %}
+    {% endfor %}
+    {% for key, value in people.items %}
+      {% if key == member.id %}
+        <div class="col-4">
+          <small style="width:100px">
+            <a href="{% url 'photo:list' %}?person={{ member.first_name }} {{ member.last_name }}&page=1"
+            class="w-100" style="color:#aaaaff;">
+              <div class="text-center">Photos Of</div>
+              <div class="text-center">(<strong>{{ value }}</strong>)</div>
+            </a>
+          </small>
+        </div>
       {% endif %}
     {% endfor %}
     {% for key, value in favorites.items %}
       {% if key == member.id %}
+        <div class="col-4">
+        <small style="width:100px;">
         <a href="{% url 'photo:list' %}?favorites={{ member.first_name }} {{ member.last_name }}&page=1"
-        class="text-danger fw-bold"> ({{ value }}) Favorites.</a>
+           class="w-100" style="color:#ffaaaa;">
+           <div class="text-center">Favorites</div>
+           <div class="text-center">(<strong>{{ value }}</strong>)</div>
+        </a>
+        </small>
+      </div>
       {% endif %}
     {% endfor %}
-  <br>
+      </div>
+      </div>
   {% endfor %}
+  </div>
 </div>
 
 {% endblock %}

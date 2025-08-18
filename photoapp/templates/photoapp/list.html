@@ -1,93 +1,224 @@
 {% extends 'base.html' %}
 
 {% block body %}
-
-<div class="row">
-  <div class="col-2 mb-4">
-    <h4 class="fw-bold">Tags</h4>
-    {% for key, value in tag_list.items %}
-      {% if value < 2 %}
-        <a href="{% url 'photo:list' %}?tag={{ key }}&page=1" class="date link-dark">
-          {{ key }} (<span class="fw-bold" style="color:#3841b4">{{ value }}</span>)</a><br/>
-      {% elif value < 10 %}
-        <a href="{% url 'photo:list' %}?tag={{ key }}&page=1" class="date link-dark fw-bold">
-          {{ key }} (<span style="color:#3841b4">{{ value }}</span>)</a><br/>
-      {% elif value < 40 %}
-        <small><a href="{% url 'photo:list' %}?tag={{ key }}&page=1" class="link-dark fw-bold">
-          {{ key }} (<span style="color:#3841b4">{{ value }}</span>)</a></small><br/>
-      {% else %}
-        <a href="{% url 'photo:list' %}?tag={{ key }}&page=1" class="link-dark fw-bold">
-          {{ key }} (<span style="color:#3841b4">{{ value }}</span>)</a><br/>
-      {% endif %}
-    {% endfor %}
-  </div>
-  <div class="col-2 mb-4">
-    <h4 class="fw-bold">Year</h4>
-    <form class="" method="GET">
-      {% csrf_token %}
-      <select class="yearbutton" name="year">
-        {% for key, value in year_list.items %}
-        <option value="{{ key }}">{{ key }} ({{ value }})</option>
-        {% endfor %}
-      </select>
-      <input type="hidden" name="page" value="1">
-      <button type="submit" class="btn btn-dark">Go</button>
-    </form>
-    <h4 class="fw-bold">People</h4>
-    {% for key, value in people_list.items %}
-      {% if key|stringformat:'s' == 'None' %}
-        <a href="{% url 'photo:list' %}?person={{ key }}&page=1" class="link-light">
-          <strong>{{ key }} ({{ value }})</strong></a><br/>
-      {% else %}
-        <a href="{% url 'photo:list' %}?person={{ key }}&page=1" class="link-dark">
-          {{ key }} (<span class="fw-bold" style="color:#3841b4">{{ value }}</span>)</a><br/>
-      {% endif %}
-    {% endfor %}
-  </div>
-  <div class="col-8">
-    <div class="row">
-      <a href="{% url 'photo:list' %}?page=1" class="ml-4"><button class="btn btn-sm btn-warning">See All {{ photo_list|length }} Photos</button></a>
-      <div class="text-centered m-2"><h3>{{ message }}</h3>
-        <h4>Sort By:
-        <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=createdasc&page=1"><button class='btn btn-sm btn-dark'>Date Added ▲</button></a>
-        <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=createddesc&page=1"><button class='btn btn-sm btn-dark'>Date Added ▼</button></a>
-        <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=yearasc&page=1"><button class='btn btn-sm btn-dark'>Year ▲</button></a>
-        <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=yeardesc&page=1"><button class='btn btn-sm btn-dark'>Year ▼</button></a>
-        </h4>
-      </div>
-        {% for photo in photos %}
-        <a href="{% url 'photo:detail' photo.id %}" class="d-block mb-4 w-25">
-        <img src="/media/{{photo.thumbnail}}" class="img-fluid img-thumbnail rounded" alt="{{photo.title}}" />
-        <div class="title text-white">{{ photo.title }}</div>
-        <div class="date text-white"><em>Added {{ photo.created|date:'N d Y' }}</em></div>
-        <div class="date text-white"><em>By {{ photo.submitter }}</em></div>
-        <div class="date text-white">Photo taken in <strong>{{ photo.year }}</strong></div>
-        {% if photo.comments.all|length > 0 %}
-          <span class="date" style="color:#3841b4"><strong>*Comments ({{ photo.comments.all|length }}) </strong></span>
-        {% endif %}
-        {% if photo.favorite.all|length > 0 %}
-          <span class="date text-danger"><strong>*Favorites ({{ photo.favorite.all|length }})</strong></span>
-        {% endif %}
+<div class="teamus-container">
+  <div class="row">
+    <div class="col-12 col-md-6 col-xl-4">
+      <div class="site-title-container text-center mx-auto mb-3">
+        <h1 >Team Us Photos</h1>
+        <a href="{% url 'photo:create' %}">
+          <div class="add-button my-3 mx-auto">
+            Add Photo
+            <img src="/media/addicon.png" style="margin-left:15px;margin-top:5px;">
+          </div>
         </a>
-        {% endfor %}
+      </div>
     </div>
-    <!-- Pagination code starts here -->
-    <div class="container-fluid">
-      {% for page_number in photos.adjusted_elided_pages %}
-        {% if page_number == photos.paginator.ELLIPSIS %}
-            {{page_number}}
+    <div class="col-12 col-md-6 col-xl-8">
+      <div class="row">
+        <div class="col-12 col-xl-4 mb-3">
+          <div class="dropdown justify-content-center">
+            <button class="btn btn-secondary dropdown-toggle fw-bold teamus-btn-wd" type="button" id="tagsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              Tags
+            </button>
+            <ul class="dropdown-menu teamus-btn-wd" aria-labelledby="tagsDropdown">
+              {% for key, value in tag_list.items %}
+                <li class="text-center">
+                  {% if value < 2 %}
+                    <a class="dropdown-item date link-dark" href="{% url 'photo:list' %}?tag={{ key }}&page=1">
+                      {{ key }} (<span class="fw-bold teamus-yellow-text">{{ value }}</span>)
+                    </a>
+                  {% elif value < 10 %}
+                    <a class="dropdown-item date link-dark fw-bold" href="{% url 'photo:list' %}?tag={{ key }}&page=1">
+                      {{ key }} (<span class="teamus-yellow-text">{{ value }}</span>)
+                    </a>
+                  {% elif value < 40 %}
+                    <a class="dropdown-item link-dark fw-bold" href="{% url 'photo:list' %}?tag={{ key }}&page=1">
+                      {{ key }} (<span class="teamus-yellow-text">{{ value }}</span>)
+                    </a>
+                  {% else %}
+                    <a class="dropdown-item link-dark fw-bold" href="{% url 'photo:list' %}?tag={{ key }}&page=1">
+                      {{ key }} (<span class="teamus-yellow-text">{{ value }}</span>)
+                    </a>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        <div class="col-12 col-xl-4 mb-3">
+          <div class="dropdown justify-content-center">
+            <button class="btn btn-secondary dropdown-toggle fw-bold teamus-btn-wd" type="button" id="peopleDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              People
+            </button>
+            <ul class="dropdown-menu teamus-btn-wd" aria-labelledby="peopleDropdown">
+              {% for key, value in people_list.items %}
+                <li class="text-center" style="font-size: 14px !important;">
+                  {% if key|stringformat:'s' == 'None' %}
+                    <a class="dropdown-item link-light" href="{% url 'photo:list' %}?person={{ key }}&page=1">
+                      <strong>{{ key }} ({{ value }})</strong>
+                    </a>
+                  {% else %}
+                    <a class="dropdown-item link-dark" href="{% url 'photo:list' %}?person={{ key }}&page=1">
+                      {{ key }} (<span class="fw-bold teamus-yellow-text">{{ value }}</span>)
+                    </a>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        <div class="col-12 col-xl-4 mb-3">
+          <div class="dropdown justify-content-center">
+            <button class="btn btn-secondary dropdown-toggle fw-bold teamus-btn-wd" type="button" id="yearDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+              Year
+            </button>
+            <ul class="dropdown-menu teamus-btn-wd" aria-labelledby="yearDropdown">
+              {% for key, value in year_list.items %}
+              <li class="text-center">
+                <a class="dropdown-item link-dark" style="font-size: 16px;" href="{% url 'photo:list' %}?year={{ key }}&page=1">
+                  {{ key }} (<span class="fw-bold teamus-yellow-text">{{ value }}</span>)
+                </a>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        <div class="col-12 text-center sort-container mb-3">
+          <h3 class="teamus-blue-text">Sort By:</h3>
+          <strong>
+            {% if sort == 'createddesc' %}
+            <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=createddesc&page=1"><button class='btn btn-sm btn-dark sort-button-active' style="margin-right: 2px;">Added ▼</button></a>
+            <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=createdasc&page=1"><button class='btn btn-sm btn-dark' style="margin-right: 2px;">Added ▲</button></a>
+            <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=yeardesc&page=1"><button class='btn btn-sm btn-dark' style="margin-right: 2px;">Taken ▼</button></a>
+            <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=yearasc&page=1"><button class='btn btn-sm btn-dark'>Taken ▲</button></a>
+            {% elif sort == 'createdasc' %}
+            <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=createddesc&page=1"><button class='btn btn-sm btn-dark' style="margin-right: 2px;">Added ▼</button></a>
+            <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=createdasc&page=1"><button class='btn btn-sm btn-dark sort-button-active' style="margin-right: 2px;">Added ▲</button></a>
+            <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=yeardesc&page=1"><button class='btn btn-sm btn-dark' style="margin-right: 2px;">Taken ▼</button></a>
+            <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=yearasc&page=1"><button class='btn btn-sm btn-dark'>Taken ▲</button></a>
+            {% elif sort == 'yeardesc' %}
+            <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=createddesc&page=1"><button class='btn btn-sm btn-dark' style="margin-right: 2px;">Added ▼</button></a>
+            <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=createdasc&page=1"><button class='btn btn-sm btn-dark' style="margin-right: 2px;">Added ▲</button></a>
+            <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=yeardesc&page=1"><button class='btn btn-sm btn-dark sort-button-active' style="margin-right: 2px;">Taken ▼</button></a>
+            <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=yearasc&page=1"><button class='btn btn-sm btn-dark'>Taken ▲</button></a>
+            {% elif sort == 'yearasc' %}
+            <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=createddesc&page=1"><button class='btn btn-sm btn-dark' style="margin-right: 2px;">Added ▼</button></a>
+            <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=createdasc&page=1"><button class='btn btn-sm btn-dark' style="margin-right: 2px;">Added ▲</button></a>
+            <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=yeardesc&page=1"><button class='btn btn-sm btn-dark' style="margin-right: 2px;">Taken ▼</button></a>
+            <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=yearasc&page=1"><button class='btn btn-sm btn-dark sort-button-active'>Taken ▲</button></a>
+            {% else %}
+            <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=createddesc&page=1"><button class='btn btn-sm btn-dark sort-button-active' style="margin-right: 2px;">Added ▼</button></a>
+            <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=createdasc&page=1"><button class='btn btn-sm btn-dark' style="margin-right: 2px;">Added ▲</button></a>
+            <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=yeardesc&page=1"><button class='btn btn-sm btn-dark' style="margin-right: 2px;">Taken ▼</button></a>
+            <a href="{% url 'photo:list' %}?{{ search_m }}={{ search }}&sort_by=yearasc&page=1"><button class='btn btn-sm btn-dark'>Taken ▲</button></a>
+            {% endif %}
+          </strong>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-12 col-md-4 text-center mb-3">
+      <a href="{% url 'photo:list' %}?page=1">
+        <button class="btn btn-sm btn-warning teamus-btn-md ">
+          See All {{ total_photos_all }} Photos
+        </button>
+      </a>
+    </div>
+    <div class="col-12 col-md-4 text-center mb-3">
+      <a href="{% url 'photo:list' %}?favorites={{ user.first_name }} {{user.last_name }}&page=1">
+        <button class="btn btn-sm btn-dark teamus-btn-md teamus-red-text">
+          My Favorites
+        </button>
+      </a>
+    </div>
+    <div class="col-12 col-md-4 text-center mb-3">
+      <button type="button" class="btn btn-sm btn-dark teamus-btn-md teamus-green-text"
+              id="recentActivityBtn">
+        Recent Activity
+      </button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-12 text-center mt-3 pt-2 pb-1 mb-3 photo-message">
+      <h5>
+        {{ message }}
+        {% if total_photos %}
+          <nobr>({{ photos.start_index }}–{{ photos.end_index }} of {{ total_photos }})</nobr>
         {% else %}
-          {% if page_number != photos.number %}
-            <a href="?{{ search_m }}={{ search }}&sort_by={{ sort }}&page={{ page_number }}" class="float-right btn btn-dark">{{ page_number }}</a>
-          {% else %}
-            <span class="float-right btn btn-warning"><strong>{{page_number}}</strong></span>
-          {% endif %}
+          (0–0 of 0)
         {% endif %}
+      </h5>
+    </div>
+  </div>
+  <div class="row">
+    <!-- Pagination code starts here -->
+    <div class="container-fluid text-center mb-3">
+      {% for page_number in page_links %}
+      {% if page_number == photos.paginator.ELLIPSIS %}
+      {{page_number}}
+      {% else %}
+      {% if page_number != photos.number %}
+      <a href="?{{ search_m }}={{ search }}&sort_by={{ sort }}&page={{ page_number }}" class="float-right btn btn-dark" style="padding:5px 8px 5px 8px;">{{ page_number }}</a>
+      {% else %}
+      <span class="float-right btn btn-warning"
+            style="padding:5px 8px 5px 8px;">
+            <strong>{{page_number}}</strong>
+      </span>
+      {% endif %}
+      {% endif %}
       {% endfor %}
     </div>
     <!-- Pagination code ends here -->
   </div>
-
+  {% load cache %}
+  {% cache 120 photos_grid grid_ver search sort photos.number %}
+  <div class="row photo-container mb-3">
+    {% for photo in photos %}
+      <div class="col-6 col-xl-3 mb-3 js-photo-tile text-center" data-photo-id="{{ photo.id }}">
+        <a href="{% url 'photo:detail' photo.id %}" class="js-open-photo d-block text-center" data-photo-id="{{photo.id}}">
+          <img src="/media/{{photo.thumbnail}}" class="img-fluid img-thumbnail rounded mx-auto d-block" alt="{{photo.title}}" />
+          <div class="title">{{ photo.title }}</div>
+          <div class="date text-white"><em>Added {{ photo.created|date:'N d Y' }}</em></div>
+          <div class="date text-white"><em>By {{ photo.submitter }}</em></div>
+          <div class="date year-taken">Photo taken in <strong>{{ photo.year }}</strong></div>
+          <span class="date comments js-comment-count {% if photo.comments_count == 0 %}d-none{% endif %}"
+                data-photo-id="{{ photo.id }}">
+            <strong><nobr># Comments (<span class="js-num">{{ photo.comments_count }}</span>)</nobr></strong>
+          </span>
+          <span class="date favorites js-fav-count {% if photo.favorites_count == 0 %}d-none{% endif %}"
+                data-photo-id="{{ photo.id }}">
+            <strong><nobr>♥ Favorites (<span class="js-num">{{ photo.favorites_count }}</span>)</nobr></strong>
+          </span>
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+  {% endcache %}
+  <div class="row">
+    <!-- Pagination code starts here -->
+    <div class="container-fluid text-center mb-3">
+      {% for page_number in page_links %}
+      {% if page_number == photos.paginator.ELLIPSIS %}
+      {{page_number}}
+      {% else %}
+      {% if page_number != photos.number %}
+      <a href="?{{ search_m }}={{ search }}&sort_by={{ sort }}&page={{ page_number }}" class="float-right btn btn-dark" style="padding:5px 8px 5px 8px;">{{ page_number }}</a>
+      {% else %}
+      <span class="float-right btn btn-warning"
+            style="padding:5px 8px 5px 8px;">
+            <strong>{{page_number}}</strong>
+      </span>
+      {% endif %}
+      {% endif %}
+      {% endfor %}
+    </div>
+    <!-- Pagination code ends here -->
+  </div>
 </div>
+<div id="photoDetailModalMount"></div>
+<div id="activityModalMount"></div>
+<script src="/static/js/detail-modal.js"></script>
 
 {% endblock body %}
