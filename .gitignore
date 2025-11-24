@@ -4,3 +4,10 @@ db.sqlite3
 __pycache__/
 .idea/
 old/
+
+/media/photos/*
+/media/thumbnails/*
+
+!media/photos/.gitkeep
+!media/thumbnails/.gitkeep
+
